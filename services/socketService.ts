@@ -1,9 +1,11 @@
 import { io, Socket } from "socket.io-client";
 import { LeaderboardEntry, User } from "../types";
 
-// Ensure this matches your server URL.
-// In production, this should be your deployed server URL
-const SERVER_URL = (import.meta as any).env.VITE_SERVER_URL || "http://localhost:3000";
+// Automatically use the current domain in production, localhost in development
+const SERVER_URL = 
+  ((import.meta as any).env?.VITE_SERVER_URL) || 
+  (typeof window !== 'undefined' && window.location.origin) || 
+  "http://localhost:3000";
 
 export class SocketService {
   private socket: Socket | null = null;
