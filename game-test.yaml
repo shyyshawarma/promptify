@@ -1,0 +1,46 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+  - duration: 60
+    arrivalRate: 10
+    rampTo: 100    # Ramp up to 100 users/sec
+  - duration: 300  # Hold for 5 minutes
+    arrivalRate: 100
+  engines:
+    socketio:
+      transports: ["websocket"] # Force websocket to skip polling
+
+  # Define variables to generate unique user data
+  variables:
+    username: "Player_{{ $randomString() }}"
+    initialScore: "{{ $randomNumber(1, 100) }}"
+
+scenarios:
+  - name: "Active Player Loop"
+    engine: "socketio"
+    flow:
+      # 1. Join the game
+      - emit:
+          channel: "join"
+          data:
+            username: "{{ username }}"
+            avatarUrl: "http://example.com/avatar.png"
+      
+      # Wait a moment after joining
+      - think: 1
+
+      # 2. Simulate Gameplay (Update score 10 times)
+      - loop:
+        - emit:
+            channel: "update_progress"
+            data:
+              score: "{{ $randomNumber(100, 1000) }}"
+              status: "playing"
+        
+        # Verify we receive the leaderboard update (optional but good for validation)
+        # This checks if the server is actually responding
+        # - wait: 
+        #    on: "leaderboard_update" 
+
+        - think: 1 # Wait 1 second between updates
+        count: 10
