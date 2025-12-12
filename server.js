@@ -184,8 +184,17 @@
 
 import { Server } from "socket.io";
 import { createServer } from "http";
+import express from "express";
+import { fileURLToPath } from "url";
+import path from "path";
 
-const httpServer = createServer();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const app = express();
+const httpServer = createServer(app);
+
+// Serve static frontend build
+app.use(express.static(path.join(__dirname, "dist")));
+
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
@@ -300,8 +309,13 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 3000;
+// Fallback route for SPA (serve index.html for all unknown routes)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
-  console.log(`Socket.io server running on http://localhost:${PORT}`);
+  console.log(`Socket.io server running on port ${PORT}`);
   console.log(`Memory cleanup scheduled for inactive players > 5 hours.`);
 });

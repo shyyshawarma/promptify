@@ -2,8 +2,8 @@ import { io, Socket } from "socket.io-client";
 import { LeaderboardEntry, User } from "../types";
 
 // Ensure this matches your server URL.
-// If running locally, usually http://localhost:3000
-const SERVER_URL = "http://localhost:3000";
+// In production, this should be your deployed server URL
+const SERVER_URL = (import.meta as any).env.VITE_SERVER_URL || "http://localhost:3000";
 
 export class SocketService {
   private socket: Socket | null = null;
